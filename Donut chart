@@ -1,0 +1,87 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Donut chart',
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Donut chart'),
+        ),
+        body: Center(
+          child: DonutChart(
+            data: [30, 70, 45, 55],
+            colors: [Colors.red, Colors.green, Colors.blue, Colors.yellow],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DonutChart extends StatelessWidget {
+  final List<double> data;
+  final List<Color> colors;
+
+  DonutChart({required this.data, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(600, 600),
+      painter: DonutChartPainter(data: data, colors: colors),
+    );
+  }
+}
+
+class DonutChartPainter extends CustomPainter {
+  final List<double> data;
+  final List<Color> colors;
+
+  DonutChartPainter({required this.data, required this.colors});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double total = data.reduce((a, b) => a + b);
+    double startAngle = -pi / 2; // Let's start from the top (12 o'clock)
+    
+    Paint paint = Paint()
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < data.length; i++) {
+      double sweepAngle = (data[i] / total) * 2 * pi; // Angle for cutting
+
+      paint.color = colors[i];
+
+      // Рисуем сектор
+      canvas.drawArc(
+        Rect.fromCenter(center: Offset(size.width / 2, size.height / 2), width: size.width, height: size.height),
+        startAngle,
+        sweepAngle,
+        true,
+        paint,
+      );
+
+      startAngle += sweepAngle; // Let's move on to the next corner
+    }
+
+    // Draw a central circle to create a ring effect
+    paint.color = Colors.white; // Color of the inner part
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      size.width / 4,  // Radius of the central circle
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
